@@ -309,7 +309,12 @@ function Configure
     if [ ! -f configure ]; then
         ./autogen.sh
     fi
-    ./configure $* &> ${TMP_LOG}
+    # Added Gentoo fix, because usally ncurses is compiled with the tinfo USE flag...
+    if [ "$(. /etc/os-release; echo "$NAME")" = "Gentoo" ]; then
+        ./configure $* LIBS=-ltinfo &> ${TMP_LOG}
+    else
+        ./configure $* &> ${TMP_LOG}
+    fi
     RESULT="$?"
     cat ${TMP_LOG} >> $LOG
     rm -f ${TMP_LOG}
