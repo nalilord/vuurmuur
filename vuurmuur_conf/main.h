@@ -21,9 +21,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "../config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,12 +105,6 @@
 #define CP_WIN_NOTE_REV 22
 
 #define CP_RULE_BAR 23
-
-#ifdef SYSCONFDIR
-#define VUURMUURCONF_CONFIGFILE SYSCONFDIR "/vuurmuur/vuurmuur_conf.conf"
-#else
-#define VUURMUURCONF_CONFIGFILE "/etc/vuurmuur/vuurmuur_conf.conf"
-#endif
 
 #ifndef MIN
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2002-2022 by Victor Julien                              *
+ *   Copyright (C) 2002-2025 by Victor Julien                              *
  *   victor@vuurmuur.org                                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,7 +21,6 @@
 #ifndef __VUURMUUR_H__
 #define __VUURMUUR_H__
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -54,9 +53,9 @@
 #include <linux/netfilter/nf_conntrack_tcp.h>
 
 /* our version */
-#define VUURMUUR_VERSION "0.8.1"
+#define VUURMUUR_VERSION "0.8.2"
 
-#define VUURMUUR_COPYRIGHT "Copyright (C) 2002-2022 Victor Julien et al"
+#define VUURMUUR_COPYRIGHT "Copyright (C) 2002-2025 Victor Julien et al"
 
 /* we need this to stringify the VUURMUUR_CONFIGDIR which is supplied at
    compiletime see:
