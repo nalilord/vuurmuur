@@ -438,6 +438,19 @@ struct {
             *logmartiansfld, *logmartianslabelfld, *logmartiansbracketsfld;
 } IfSec;
 
+static void edit_interface_position_binddevice(char near_virtual)
+{
+    if (near_virtual == TRUE) {
+        (void)move_field(IfSec.binddevicelabelfld, 7, 38);
+        (void)move_field(IfSec.binddevicebracketsfld, 8, 54);
+        (void)move_field(IfSec.binddevicefld, 8, 55);
+    } else {
+        (void)move_field(IfSec.binddevicelabelfld, 11, 24);
+        (void)move_field(IfSec.binddevicebracketsfld, 11, 20);
+        (void)move_field(IfSec.binddevicefld, 11, 21);
+    }
+}
+
 int protectrule_loaded(
         struct vrmr_list *rules_list, char *action, char *danger, char *source)
 {
@@ -1269,18 +1282,23 @@ static int edit_interface(
 
     edit_interface_init(vctx, height, width, starty, startx, iface_ptr);
     cur = current_field(ifsec_ctx.edit.form);
+    edit_interface_position_binddevice(!(advanced_mode &&
+            field_buffer(IfSec.devicevirtualfld, 0)[0] != 'X'));
 
     draw_top_menu(top_win, gettext("Edit Interface"), key_choices_n,
             key_choices, cmd_choices_n, cmd_choices);
 
     // Loop through to get user requests
     while (quit == 0) {
+        char show_bind_near_virtual = TRUE;
+
         if (advanced_mode) {
             field_opts_on(IfSec.devicevirtuallabelfld, O_VISIBLE);
             field_opts_on(IfSec.devicevirtualbracketsfld, O_VISIBLE);
             field_opts_on(IfSec.devicevirtualfld, O_VISIBLE);
 
             if (field_buffer(IfSec.devicevirtualfld, 0)[0] != 'X') {
+                show_bind_near_virtual = FALSE;
                 field_opts_on(IfSec.labelfld, O_VISIBLE);
 
                 field_opts_on(IfSec.srcrtpktslabelfld, O_VISIBLE);
@@ -1335,6 +1353,8 @@ static int edit_interface(
             field_opts_off(IfSec.logmartiansbracketsfld, O_VISIBLE);
             field_opts_off(IfSec.logmartiansfld, O_VISIBLE);
         }
+
+        edit_interface_position_binddevice(show_bind_near_virtual);
 
         draw_field_active_mark(cur, prev, ifsec_ctx.edit.win,
                 ifsec_ctx.edit.form, vccnf.color_win_mark | A_BOLD);
