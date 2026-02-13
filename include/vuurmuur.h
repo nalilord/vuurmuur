@@ -775,6 +775,8 @@ struct vrmr_interface {
     char device_virtual;
     /* old style (eth0:0) */
     char device_virtual_oldstyle;
+    /* bind rules to device with -i/-o */
+    char bind_device;
 
     /* the ipaddress */
     struct vrmr_ipv4_data ipv4;

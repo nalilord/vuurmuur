@@ -139,6 +139,7 @@ void *vrmr_interface_malloc()
     iface_ptr->type = VRMR_TYPE_INTERFACE;
 
     iface_ptr->active = TRUE;
+    iface_ptr->bind_device = TRUE;
 
     vrmr_list_setup(&iface_ptr->ProtectList, free);
 

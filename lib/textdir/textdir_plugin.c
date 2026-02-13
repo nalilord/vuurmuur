@@ -657,6 +657,10 @@ int add_textdir(void *backend, const char *name, enum vrmr_objecttypes type)
             vrmr_error(-1, "Error", "write: %s", strerror(errno));
             goto error;
         }
+        if (write(fd, "BIND_DEVICE=\"Yes\"\n", 18) == -1) {
+            vrmr_error(-1, "Error", "write: %s", strerror(errno));
+            goto error;
+        }
         if (write(fd, "RULE=\"\"\n", 8) == -1) {
             vrmr_error(-1, "Error", "write: %s", strerror(errno));
             goto error;

@@ -1039,7 +1039,8 @@ static int rulecreate_dst_loop(struct vrmr_config *conf,
             }
 
             /* set interface */
-            if (rule->from_if_ptr->device_virtual_oldstyle == TRUE) {
+            if (rule->from_if_ptr->bind_device == FALSE ||
+                    rule->from_if_ptr->device_virtual_oldstyle == TRUE) {
                 memset(rule->from_int, 0, sizeof(rule->from_int));
             } else {
                 (void)strlcpy(rule->from_int, rule->from_if_ptr->device,
@@ -1062,7 +1063,8 @@ static int rulecreate_dst_loop(struct vrmr_config *conf,
             }
 
             /* set interface */
-            if (rule->to_if_ptr->device_virtual_oldstyle == TRUE) {
+            if (rule->to_if_ptr->bind_device == FALSE ||
+                    rule->to_if_ptr->device_virtual_oldstyle == TRUE) {
                 memset(rule->from_int, 0, sizeof(rule->from_int));
             } else {
                 (void)strlcpy(rule->from_int, rule->to_if_ptr->device,
@@ -1245,7 +1247,8 @@ static int rulecreate_src_loop(struct vrmr_config *conf,
             }
 
             /* set interface */
-            if (rule->to_if_ptr->device_virtual_oldstyle == TRUE) {
+            if (rule->to_if_ptr->bind_device == FALSE ||
+                    rule->to_if_ptr->device_virtual_oldstyle == TRUE) {
                 memset(rule->to_int, 0, sizeof(rule->to_int));
             } else {
                 (void)strlcpy(rule->to_int, rule->to_if_ptr->device,
@@ -1273,7 +1276,8 @@ static int rulecreate_src_loop(struct vrmr_config *conf,
             }
 
             /* set interface */
-            if (rule->from_if_ptr->device_virtual_oldstyle == TRUE) {
+            if (rule->from_if_ptr->bind_device == FALSE ||
+                    rule->from_if_ptr->device_virtual_oldstyle == TRUE) {
                 memset(rule->to_int, 0, sizeof(rule->to_int));
             } else {
                 (void)strlcpy(rule->to_int, rule->from_if_ptr->device,
@@ -1571,13 +1575,15 @@ static int rulecreate_dst_iface_loop(struct vrmr_ctx *vctx,
 
             active = rule->to_if_ptr->active;
 
-            if (rule->to_if_ptr->device_virtual_oldstyle == FALSE)
+            if (rule->to_if_ptr->bind_device == TRUE &&
+                    rule->to_if_ptr->device_virtual_oldstyle == FALSE)
                 (void)strlcpy(rule->to_int, rule->to_if_ptr->device,
                         sizeof(rule->to_int));
             else
                 memset(rule->to_int, 0, sizeof(rule->to_int));
 
-            if (rule->to_if_ptr->dynamic == TRUE &&
+            if (rule->to_if_ptr->bind_device == TRUE &&
+                    rule->to_if_ptr->dynamic == TRUE &&
                     rule->to_if_ptr->up == FALSE) {
                 vrmr_info("Info",
                         "not creating rule: 'to'-interface '%s' is dynamic and "
@@ -1641,13 +1647,15 @@ static int rulecreate_dst_iface_loop(struct vrmr_ctx *vctx,
 
             active = rule->to_if_ptr->active;
 
-            if (rule->to_if_ptr->device_virtual_oldstyle == FALSE)
+            if (rule->to_if_ptr->bind_device == TRUE &&
+                    rule->to_if_ptr->device_virtual_oldstyle == FALSE)
                 (void)strlcpy(rule->to_int, rule->to_if_ptr->device,
                         sizeof(rule->to_int));
             else
                 memset(rule->to_int, 0, sizeof(rule->to_int));
 
-            if (rule->to_if_ptr->dynamic == TRUE &&
+            if (rule->to_if_ptr->bind_device == TRUE &&
+                    rule->to_if_ptr->dynamic == TRUE &&
                     rule->to_if_ptr->up == FALSE) {
                 vrmr_info("Info",
                         "not creating rule: 'to'-interface '%s' is dynamic and "
@@ -1748,13 +1756,15 @@ static int rulecreate_dst_iface_loop(struct vrmr_ctx *vctx,
                 if the device is virtual (oldstyle) we don't want it in our
                 iptables commands
              */
-            if (rule->to_if_ptr->device_virtual_oldstyle == FALSE)
+            if (rule->to_if_ptr->bind_device == TRUE &&
+                    rule->to_if_ptr->device_virtual_oldstyle == FALSE)
                 (void)strlcpy(rule->to_int, rule->to_if_ptr->device,
                         sizeof(rule->to_int));
             else
                 memset(rule->to_int, 0, sizeof(rule->to_int));
 
-            if (rule->to_if_ptr->dynamic == TRUE &&
+            if (rule->to_if_ptr->bind_device == TRUE &&
+                    rule->to_if_ptr->dynamic == TRUE &&
                     rule->to_if_ptr->up == FALSE) {
                 vrmr_info("Info",
                         "not creating rule: 'to'-interface '%s' is dynamic and "
@@ -1876,13 +1886,15 @@ static int rulecreate_src_iface_loop(struct vrmr_ctx *vctx,
 
             active = rule->from_if_ptr->active;
 
-            if (rule->from_if_ptr->device_virtual_oldstyle == FALSE)
+            if (rule->from_if_ptr->bind_device == TRUE &&
+                    rule->from_if_ptr->device_virtual_oldstyle == FALSE)
                 (void)strlcpy(rule->from_int, rule->from_if_ptr->device,
                         sizeof(rule->from_int));
             else
                 memset(rule->from_int, 0, sizeof(rule->from_int));
 
-            if (rule->from_if_ptr->dynamic == TRUE &&
+            if (rule->from_if_ptr->bind_device == TRUE &&
+                    rule->from_if_ptr->dynamic == TRUE &&
                     rule->from_if_ptr->up == FALSE) {
                 vrmr_info("Info",
                         "not creating rule: 'from'-interface '%s' is dynamic "
@@ -1925,13 +1937,15 @@ static int rulecreate_src_iface_loop(struct vrmr_ctx *vctx,
 
             active = rule->from_if_ptr->active;
 
-            if (rule->from_if_ptr->device_virtual_oldstyle == FALSE)
+            if (rule->from_if_ptr->bind_device == TRUE &&
+                    rule->from_if_ptr->device_virtual_oldstyle == FALSE)
                 (void)strlcpy(rule->from_int, rule->from_if_ptr->device,
                         sizeof(rule->from_int));
             else
                 memset(rule->from_int, 0, sizeof(rule->from_int));
 
-            if (rule->from_if_ptr->dynamic == TRUE &&
+            if (rule->from_if_ptr->bind_device == TRUE &&
+                    rule->from_if_ptr->dynamic == TRUE &&
                     rule->from_if_ptr->up == FALSE) {
                 vrmr_info("Info",
                         "not creating rule: 'from'-interface '%s' is dynamic "
@@ -2012,13 +2026,15 @@ static int rulecreate_src_iface_loop(struct vrmr_ctx *vctx,
                 if the device is virtual (oldstyle) we don't want it in our
                 iptables commands
              */
-            if (rule->from_if_ptr->device_virtual_oldstyle == FALSE)
+            if (rule->from_if_ptr->bind_device == TRUE &&
+                    rule->from_if_ptr->device_virtual_oldstyle == FALSE)
                 (void)strlcpy(rule->from_int, rule->from_if_ptr->device,
                         sizeof(rule->from_int));
             else
                 memset(rule->from_int, 0, sizeof(rule->from_int));
 
-            if (rule->from_if_ptr->dynamic == TRUE &&
+            if (rule->from_if_ptr->bind_device == TRUE &&
+                    rule->from_if_ptr->dynamic == TRUE &&
                     rule->from_if_ptr->up == FALSE) {
                 vrmr_info("Info",
                         "not creating rule: 'from'-interface '%s' is dynamic "

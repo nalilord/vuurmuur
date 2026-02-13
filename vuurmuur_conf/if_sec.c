@@ -419,6 +419,7 @@ struct {
 
             *devicevirtualfld, *devicevirtuallabelfld,
             *devicevirtualbracketsfld,
+            *binddevicefld, *binddevicelabelfld, *binddevicebracketsfld,
 
             *interfaceupfld, *interfaceuplabelfld,
 
@@ -487,7 +488,7 @@ static void edit_interface_init(struct vrmr_ctx *vctx, int height, int width,
     size_t field_num = 0;
     size_t i = 0;
 
-    ifsec_ctx.edit.n_fields = 34;
+    ifsec_ctx.edit.n_fields = 37;
     ifsec_ctx.edit.fields =
             (FIELD **)calloc(ifsec_ctx.edit.n_fields + 1, sizeof(FIELD *));
     vrmr_fatal_alloc("calloc", ifsec_ctx.edit.fields);
@@ -590,6 +591,25 @@ static void edit_interface_init(struct vrmr_ctx *vctx, int height, int width,
     field_num++;
     set_field_buffer_wrap(
             IfSec.devicevirtualfld, 0, iface_ptr->device_virtual ? "X" : " ");
+
+    /* bind to device for -i/-o */
+    IfSec.binddevicebracketsfld = (ifsec_ctx.edit.fields[field_num] =
+                                           new_field_wrap(1, 3, 11, 20, 0, 0));
+    field_num++;
+    set_field_buffer_wrap(IfSec.binddevicebracketsfld, 0, "[ ]");
+    field_opts_off(IfSec.binddevicebracketsfld, O_AUTOSKIP | O_ACTIVE);
+
+    IfSec.binddevicelabelfld = (ifsec_ctx.edit.fields[field_num] =
+                                        new_field_wrap(1, 18, 11, 24, 0, 0));
+    field_num++;
+    set_field_buffer_wrap(IfSec.binddevicelabelfld, 0, STR_CBIND_DEVICE);
+    field_opts_off(IfSec.binddevicelabelfld, O_AUTOSKIP | O_ACTIVE);
+
+    IfSec.binddevicefld = (ifsec_ctx.edit.fields[field_num] =
+                                   new_field_wrap(1, 1, 11, 21, 0, 0));
+    field_num++;
+    set_field_buffer_wrap(
+            IfSec.binddevicefld, 0, iface_ptr->bind_device ? "X" : " ");
 
     /* protect label */
     IfSec.labelfld = (ifsec_ctx.edit.fields[field_num] =
@@ -793,6 +813,9 @@ static void edit_interface_init(struct vrmr_ctx *vctx, int height, int width,
     set_field_back(IfSec.devicevirtualfld, vccnf.color_win);
     set_field_back(IfSec.devicevirtuallabelfld, vccnf.color_win);
     set_field_back(IfSec.devicevirtualbracketsfld, vccnf.color_win);
+    set_field_back(IfSec.binddevicefld, vccnf.color_win);
+    set_field_back(IfSec.binddevicelabelfld, vccnf.color_win);
+    set_field_back(IfSec.binddevicebracketsfld, vccnf.color_win);
 
     /* the toggles */
     set_field_back(IfSec.labelfld, vccnf.color_win);
@@ -1136,6 +1159,30 @@ static int edit_interface_save(
                     STR_IS_NOW_SET_TO,
                     tempiface_ptr->device_virtual ? "Yes" : "No", STR_WAS,
                     iface_ptr->device_virtual ? "Yes" : "No");
+        } else if (ifsec_ctx.edit.fields[i] == IfSec.binddevicefld) {
+            status = VRMR_ST_CHANGED;
+
+            if (strncasecmp(field_buffer(ifsec_ctx.edit.fields[i], 0), "X",
+                        1) == 0) {
+                tempiface_ptr->bind_device = 1;
+            } else {
+                tempiface_ptr->bind_device = 0;
+            }
+
+            result = vctx->af->tell(vctx->ifac_backend, tempiface_ptr->name,
+                    "BIND_DEVICE", tempiface_ptr->bind_device ? "Yes" : "No",
+                    1, VRMR_TYPE_INTERFACE);
+            if (result < 0) {
+                vrmr_error(-1, VR_ERR, "%s", STR_SAVING_TO_BACKEND_FAILED);
+                free(tempiface_ptr);
+                return (-1);
+            }
+
+            vrmr_audit("%s '%s' %s: %s %s '%s' (%s: '%s').", STR_INTERFACE,
+                    iface_ptr->name, STR_HAS_BEEN_CHANGED, STR_BIND_DEVICE,
+                    STR_IS_NOW_SET_TO,
+                    tempiface_ptr->bind_device ? "Yes" : "No", STR_WAS,
+                    iface_ptr->bind_device ? "Yes" : "No");
         }
         /*
 
@@ -1317,7 +1364,8 @@ static int edit_interface(
         /* device virtual */
         else if (cur == IfSec.devicevirtualfld || cur == IfSec.srcrtpktsfld ||
                  cur == IfSec.icmpredirectfld || cur == IfSec.sendredirectfld ||
-                 cur == IfSec.rpfilterfld || cur == IfSec.logmartiansfld) {
+                 cur == IfSec.rpfilterfld || cur == IfSec.logmartiansfld ||
+                 cur == IfSec.binddevicefld) {
             not_defined = !(nav_field_toggleX(ifsec_ctx.edit.form, ch));
         } else if (cur == IfSec.ipaddressfld || cur == IfSec.ip6addressfld) {
             not_defined = !(nav_field_simpletext(ifsec_ctx.edit.form, ch));

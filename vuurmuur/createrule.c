@@ -4789,6 +4789,17 @@ static int create_interface_rpfilter_rules(struct vrmr_config *conf,
     char logprefix[64] = "";
     char cmd[VRMR_MAX_PIPE_COMMAND] = "";
 
+    if (if_ptr->bind_device == FALSE) {
+        if (conf->bash_out == TRUE) {
+            fprintf(stdout,
+                    "# rpfilter rule for interface '%s' "
+                    "not created. Interface is set to IP-only binding mode.\n",
+                    if_ptr->name);
+        }
+
+        return (0);
+    }
+
     if (if_ptr->device_virtual_oldstyle == TRUE) {
         /* here we print the description if we are in bashmode */
         if (conf->bash_out == TRUE) {
@@ -4999,6 +5010,16 @@ static int create_network_antispoof_rule(struct vrmr_config *conf,
     char logprefix[64] = "";
     char cmd[VRMR_MAX_PIPE_COMMAND] = "";
 
+    if (from_if_ptr->bind_device == FALSE) {
+        if (conf->bash_out == TRUE) {
+            fprintf(stdout,
+                    "# anti-spoof rule for interface '%s' "
+                    "not created. Interface is set to IP-only binding mode.\n",
+                    from_if_ptr->name);
+        }
+        return (0);
+    }
+
     /*  see if the interface is active */
     if (from_if_ptr->active == FALSE ||
             (from_if_ptr->dynamic == TRUE && from_if_ptr->up == FALSE)) {
@@ -5161,7 +5182,14 @@ static int create_network_protect_rules_dhcp_server(struct vrmr_config *conf,
     int retval = 0;
     char cmd[VRMR_MAX_PIPE_COMMAND] = "";
 
-    if (if_ptr->device_virtual_oldstyle == TRUE) {
+    if (if_ptr->bind_device == FALSE) {
+        if (conf->bash_out == TRUE)
+            fprintf(stdout,
+                    "# dhcp-server rules for interface '%s' not created. "
+                    "Interface is set to IP-only binding mode.\n",
+                    if_ptr->name);
+        return (0);
+    } else if (if_ptr->device_virtual_oldstyle == TRUE) {
         if (conf->bash_out == TRUE)
             fprintf(stdout,
                     "# dhcp-server rules for interface '%s' not created. The "
@@ -5269,7 +5297,14 @@ static int create_network_protect_rules_dhcp_client(struct vrmr_config *conf,
     int retval = 0;
     char cmd[VRMR_MAX_PIPE_COMMAND] = "";
 
-    if (if_ptr->dynamic == FALSE) {
+    if (if_ptr->bind_device == FALSE) {
+        if (conf->bash_out == TRUE)
+            fprintf(stdout,
+                    "# dhcp-client rules for interface '%s' not created. "
+                    "Interface is set to IP-only binding mode.\n",
+                    if_ptr->name);
+        return (0);
+    } else if (if_ptr->dynamic == FALSE) {
         if (conf->bash_out == TRUE)
             fprintf(stdout,
                     "# dhcp-client rules for interface '%s' not created. The "

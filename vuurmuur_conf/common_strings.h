@@ -68,6 +68,10 @@
 #define STR_DEVICE gettext("device")
 /* TRANSLATORS: e.g. eth0 or ppp0 */
 #define STR_CDEVICE gettext("Device")
+/* TRANSLATORS: bind iptables rules to this device with -i/-o */
+#define STR_BIND_DEVICE gettext("bind to device")
+/* TRANSLATORS: bind iptables rules to this device with -i/-o */
+#define STR_CBIND_DEVICE gettext("Bind to device")
 /* TRANSLATORS: e.g. eth0:0 is a virtual device */
 #define STR_VIRTUAL gettext("virtual")
 /* TRANSLATORS: e.g. eth0:0 is a virtual device */

@@ -283,6 +283,22 @@ int vrmr_read_interface_info(
         return (-1);
     }
 
+    /* ask if rules should bind to this device */
+    result = vctx->af->ask(vctx->ifac_backend, iface_ptr->name, "BIND_DEVICE",
+            yesno, sizeof(yesno), VRMR_TYPE_INTERFACE, 0);
+    if (result == 1) {
+        if (strcasecmp(yesno, "yes") == 0)
+            iface_ptr->bind_device = TRUE;
+        else
+            iface_ptr->bind_device = FALSE;
+    } else if (result == 0) {
+        /* default: preserve historical behavior */
+        iface_ptr->bind_device = TRUE;
+    } else {
+        vrmr_error(-1, "Internal Error", "vctx->af->ask() failed");
+        return (-1);
+    }
+
     /* ask the backend about the interface of this interface. Get it? */
     result = vctx->af->ask(vctx->ifac_backend, iface_ptr->name, "DEVICE",
             iface_ptr->device, sizeof(iface_ptr->device), VRMR_TYPE_INTERFACE,
@@ -503,7 +519,8 @@ int vrmr_read_interface_info(
         return (-1);
     }
 
-    if (iface_ptr->device_virtual_oldstyle == FALSE) {
+    if (iface_ptr->bind_device == TRUE &&
+            iface_ptr->device_virtual_oldstyle == FALSE) {
         /* now check if the interface is currently up */
         result =
                 vrmr_get_iface_stats(iface_ptr->device, NULL, NULL, NULL, NULL);
@@ -519,6 +536,8 @@ int vrmr_read_interface_info(
             vrmr_error(-1, "Internal Error", "vrmr_get_iface_stats() failed");
             return (-1);
         }
+    } else {
+        iface_ptr->up = FALSE;
     }
 
     vrmr_debug(HIGH, "end: succes. name: %s.", iface_ptr->name);
@@ -715,6 +734,14 @@ int vrmr_new_interface(struct vrmr_ctx *vctx,
     /* set virtual */
     result = vctx->af->tell(vctx->ifac_backend, iface_ptr->name, "VIRTUAL",
             iface_ptr->device_virtual ? "Yes" : "No", 1, VRMR_TYPE_INTERFACE);
+    if (result < 0) {
+        vrmr_error(-1, "Internal Error", "vctx->af->tell() failed");
+        return (-1);
+    }
+
+    /* set bind-to-device */
+    result = vctx->af->tell(vctx->ifac_backend, iface_ptr->name, "BIND_DEVICE",
+            iface_ptr->bind_device ? "Yes" : "No", 1, VRMR_TYPE_INTERFACE);
     if (result < 0) {
         vrmr_error(-1, "Internal Error", "vctx->af->tell() failed");
         return (-1);
@@ -1493,13 +1520,13 @@ int vrmr_interfaces_check(struct vrmr_interface *iface_ptr)
 
     assert(iface_ptr);
 
-    if (iface_ptr->device[0] == '\0') {
+    if (iface_ptr->bind_device == TRUE && iface_ptr->device[0] == '\0') {
         vrmr_warning("Warning", "the interface '%s' does not have a device.",
                 iface_ptr->name);
         retval = 0;
     }
 
-    if (iface_ptr->dynamic == TRUE) {
+    if (iface_ptr->bind_device == TRUE && iface_ptr->dynamic == TRUE) {
         /* now try to get the dynamic ipaddress */
         ipresult = vrmr_get_dynamic_ip(iface_ptr->device,
                 iface_ptr->ipv4.ipaddress, sizeof(iface_ptr->ipv4.ipaddress));
@@ -1519,7 +1546,9 @@ int vrmr_interfaces_check(struct vrmr_interface *iface_ptr)
     }
 
     /* check the ip if we have one */
-    if (iface_ptr->ipv4.ipaddress[0] != '\0') {
+    if (iface_ptr->ipv4.ipaddress[0] != '\0' &&
+            !(iface_ptr->dynamic == TRUE &&
+                    strcmp(iface_ptr->ipv4.ipaddress, "dynamic") == 0)) {
         if (vrmr_check_ipv4address(NULL, NULL, iface_ptr->ipv4.ipaddress, 0) !=
                 1) {
             vrmr_warning("Warning",
@@ -1532,8 +1561,8 @@ int vrmr_interfaces_check(struct vrmr_interface *iface_ptr)
     }
 
     /* if the interface is up check the ipaddress with the ipaddress we know */
-    if (iface_ptr->up == TRUE && iface_ptr->active == TRUE &&
-            iface_ptr->device_virtual == FALSE) {
+    if (iface_ptr->bind_device == TRUE && iface_ptr->up == TRUE &&
+            iface_ptr->active == TRUE && iface_ptr->device_virtual == FALSE) {
         ipresult = vrmr_get_dynamic_ip(
                 iface_ptr->device, ipaddress, sizeof(ipaddress));
         if (ipresult < 0) {
